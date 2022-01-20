@@ -1,30 +1,21 @@
 const express = require('express');
 const app = express();
-const mongoose = require('mongoose');
+const cors = require('cors');
 require('dotenv').config({ path: './config/config.env' });
+const connectDb = require('./database/db');
 const server = require('http').createServer(app);
-const io = require('socket.io')(server);
-const CallLogModel = require('./models/CallLog');
+const logRouter = require('./controller/log');
+const contactRouter = require('./controller/contact');
 
-const PORT = process.env.PORT || 8080;
+connectDb();
+const PORT = process.env.PORT;
 app.use(express.json());
+app.use(cors());
+app.use(contactRouter);
+app.use(logRouter);
 
-const connectDb = async () => {
-	await mongoose
-		.connect(
-			'mongodb+srv://huutai1612:0987418301@cluster0.rdo2f.mongodb.net/myFirstDatabase?retryWrites=true&w=majority',
-			{
-				useNewUrlParser: true,
-				useUnifiedTopology: true,
-			},
-		)
-		.then(() => console.log('connected to MongoDB'))
-		.catch((err) => console.log(err.message));
-};
-
-server.listen(PORT, async () => {
+server.listen(PORT, () => {
 	try {
-		await connectDb();
 		console.log(`server listening on port ${PORT}`);
 	} catch (error) {
 		console.log(error.message);
